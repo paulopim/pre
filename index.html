@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIP Car Wash - Presupuesto</title>
+
+<link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background:#f5f5f7;
+    margin:0;
+    padding:40px;
+    color:#1d1d1f;
+}
+
+.container{
+    max-width:1100px;
+    margin:auto;
+    background:white;
+    padding:40px;
+    border-radius:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.08);
+    animation:fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.logo img{
+    height:80px;
+}
+
+h2{
+    margin-top:40px;
+    font-weight:500;
+}
+
+input, select{
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    width:100%;
+    font-size:14px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+}
+
+button{
+    background:black;
+    color:white;
+    padding:10px 20px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    margin-top:20px;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#333;
+}
+
+.totals{
+    margin-top:30px;
+    text-align:right;
+    font-size:18px;
+}
+
+.terms{
+    font-size:12px;
+    margin-top:40px;
+    line-height:1.6;
+    color:#555;
+}
+
+.print-btn{
+    background:#0071e3;
+}
+
+@media print{
+    button{
+        display:none;
+    }
+    body{
+        background:white;
+        padding:0;
+    }
+    .container{
+        box-shadow:none;
+        border-radius:0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">
+<img src="logo.png">
+</div>
+
+<h2>Sección 1 — Cliente</h2>
+
+<div class="grid">
+<div>
+<label>Número Presupuesto</label>
+<input type="text" id="numero" readonly>
+</div>
+
+<div>
+<label>Fecha</label>
+<input type="date" id="fecha">
+</div>
+
+<div>
+<label>Nombre</label>
+<input type="text" list="clientes">
+<datalist id="clientes">
+<option>Cliente Premium 1</option>
+<option>Cliente VIP 2</option>
+</datalist>
+</div>
+
+<div>
+<label>Teléfono</label>
+<input type="text">
+</div>
+
+<div>
+<label>Email</label>
+<input type="email">
+</div>
+
+<div>
+<label>Matrícula</label>
+<input type="text">
+</div>
+
+<div>
+<label>Modelo Vehículo</label>
+<input type="text">
+</div>
+</div>
+
+<h2>Sección 2 — Servicios</h2>
+
+<table id="tabla">
+<thead>
+<tr>
+<th>Servicio</th>
+<th>Precio</th>
+<th>Unidades</th>
+<th>Subtotal</th>
+<th>Total</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+<button onclick="agregarFila()">➕ Añadir Servicio</button>
+
+<h2>Sección 3 — Totales</h2>
+
+<div class="totals">
+<p>Base Imponible: € <span id="base">0.00</span></p>
+<p>IVA 21%: € <span id="iva">0.00</span></p>
+<p><strong>TOTAL: € <span id="total">0.00</span></strong></p>
+</div>
+
+<button class="print-btn" onclick="window.print()">📄 Imprimir</button>
+<button onclick="enviarEmail()">📧 Enviar por email</button>
+
+<div class="terms">
+<h3>Términos y Condiciones</h3>
+
+<p><strong>POLÍTICA DE COBRO:</strong> El 50% del pago debe realizarse en el momento de la aceptación del presupuesto y el 50% restante deberá realizarse antes de la retirada del vehículo.</p>
+
+<p><strong>POLÍTICA DE CANCELACIÓN:</strong> Requerimos que todos los clientes avisen al menos con 24 horas de anticipación al cancelar o volver a reservar una cita. Las cancelaciones tardías o las ausencias sin aviso se cobrarán el 50% de la sesión.</p>
+
+<p><strong>Transferencia bancaria:</strong><br>
+BANKINTER<br>
+ES24 0128 0599 6601 0001 5521<br>
+BIC: BKBKESMMXXX</p>
+
+<p><strong>Tratamiento de datos:</strong> VIP CAR PAINT IBIZA SL tratará los datos para la prestación de servicios, facturación y comunicaciones comerciales. Puede ejercer sus derechos escribiendo a vipcarpaint@gmail.com</p>
+
+</div>
+
+</div>
+
+<script>
+
+function generarNumero(){
+    const hoy = new Date();
+    const mes = hoy.toLocaleString('es-ES', {month:'short'}).charAt(0).toUpperCase();
+    const año = hoy.getFullYear().toString().slice(-2);
+    const dia = String(hoy.getDate()).padStart(2,'0');
+
+    let contador = localStorage.getItem("contador-"+dia);
+    if(!contador){
+        contador = 1;
+    }else{
+        contador = parseInt(contador)+1;
+    }
+
+    localStorage.setItem("contador-"+dia,contador);
+    contador = String(contador).padStart(2,'0');
+
+    document.getElementById("numero").value = mes+año+dia+contador;
+}
+
+function agregarFila(){
+    const tabla = document.getElementById("tabla").querySelector("tbody");
+    const fila = document.createElement("tr");
+
+    fila.innerHTML = `
+        <td><input type="text"></td>
+        <td><input type="number" value="0" oninput="calcular()"></td>
+        <td><input type="number" value="1" oninput="calcular()"></td>
+        <td>0.00</td>
+        <td>0.00</td>
+        <td><button onclick="this.parentElement.parentElement.remove();calcular()">X</button></td>
+    `;
+
+    tabla.appendChild(fila);
+}
+
+function calcular(){
+    const filas = document.querySelectorAll("#tabla tbody tr");
+    let base = 0;
+
+    filas.forEach(fila=>{
+        const precio = parseFloat(fila.children[1].children[0].value)||0;
+        const unidades = parseFloat(fila.children[2].children[0].value)||0;
+        const subtotal = precio*unidades;
+        const total = subtotal*1.21;
+
+        fila.children[3].innerText = subtotal.toFixed(2);
+        fila.children[4].innerText = total.toFixed(2);
+
+        base += subtotal;
+    });
+
+    const iva = base*0.21;
+    const totalFinal = base+iva;
+
+    document.getElementById("base").innerText = base.toFixed(2);
+    document.getElementById("iva").innerText = iva.toFixed(2);
+    document.getElementById("total").innerText = totalFinal.toFixed(2);
+}
+
+function enviarEmail(){
+    window.location.href = "mailto:?subject=Presupuesto VIP Car Wash&body=Adjunto presupuesto generado.";
+}
+
+document.getElementById("fecha").valueAsDate = new Date();
+
+generarNumero();
+agregarFila();
+
+</script>
+
+</body>
+</html>
+
